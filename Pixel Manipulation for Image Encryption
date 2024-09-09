@@ -1,0 +1,42 @@
+from PIL import Image
+import numpy as np
+def swap_pixels(pixels):
+    flat_pixels = pixels.flatten()
+    for i in range(0, len(flat_pixels) - 1, 2):
+        # Swap adjacent pixel values
+        flat_pixels[i], flat_pixels[i + 1] = flat_pixels[i + 1], flat_pixels[i]
+    return flat_pixels.reshape(pixels.shape)
+
+def encrypt_image(image_path, key, output_path):
+    # Open the image and convert it to RGB
+    img = Image.open(image_path).convert('RGB')
+    pixels = np.array(img)
+
+    # Perform a basic mathematical operation (XOR with a key) and swap pixels
+    encrypted_pixels = np.bitwise_xor(pixels, key)
+    encrypted_pixels = swap_pixels(encrypted_pixels)
+
+    # Save the encrypted image
+    encrypted_img = Image.fromarray(encrypted_pixels.astype(np.uint8))
+    encrypted_img.save(output_path)
+    print(f"Image encrypted and saved to {output_path}")
+
+def decrypt_image(encrypted_image_path, key, output_path):
+    
+    # Open the encrypted image and convert it to RGB
+    img = Image.open(encrypted_image_path).convert('RGB')
+    pixels = np.array(img)
+
+    # Reverse the pixel swap and then XOR operation
+    decrypted_pixels = swap_pixels(pixels)
+    decrypted_pixels = np.bitwise_xor(decrypted_pixels, key)
+
+    # Save the decrypted image
+    decrypted_img = Image.fromarray(decrypted_pixels.astype(np.uint8))
+    decrypted_img.save(output_path)
+    print(f"Image decrypted and saved to {output_path}")
+
+# Example usage
+key = 123  # Encryption key (must be same for encryption and decryption)
+encrypt_image("input_image.jpg", key, "encrypted_image.png")
+decrypt_image("encrypted_image.png", key, "decrypted_image.png")
